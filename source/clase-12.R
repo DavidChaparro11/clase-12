@@ -16,18 +16,17 @@ p_load(tidyverse,rio,skimr,
 
 ### **4.2. Geocodificar direcciones**
 
-## Buscar un lugar público por el nombre
+## Buscar un lugar público por el nombre, la función se conecta a través del open strreet map
 geocode_OSM("Casa de Nariño, Bogotá")
 
 ## geocode_OSM no reconoce el caracter #, en su lugar se usa %23% 
-cbd <- geocode_OSM("Centro Internacional, Bogotá", as.sf=T) 
+cbd <- geocode_OSM("Centro Internacional, Bogotá", as.sf=T) #se adicieno el as.sf para codifiarlo como objeto
 cbd
 
-## la función addTiles adiciona la capa de OpenStreetMap
-leaflet() %>% addTiles() %>% addCircles(data=cbd)
+## la función addTiles adiciona la capa de OpenStreetMap. para viasualizar
+leaflet() %>% addTiles()  %>% addCircles(data=cbd)
 
-### **4.3. Librería `osmdata`**
-
+### **4.3. Librería `osmdata`**. descargar open street maps
 #### **4.3.1. Features disponibles**
 
 available_features() %>% head(20)
@@ -43,18 +42,23 @@ opq(bbox = getbb("Bogotá Colombia"))
 osm = opq(bbox = getbb("Bogotá Colombia")) %>%
       add_osm_feature(key="amenity" , value="bus_station") 
 class(osm)
-
+ors = opq(bbox = getbb("Bogotá Colombia")) %>%
+  add_osm_feature(key="amenity" , value="bar")
 ## extraer Simple Features Collection
 osm_sf = osm %>% osmdata_sf()
 osm_sf
+ors_sf <- ors %>% osmdata_sf()
 
 ## Obtener un objeto sf
 bus_station = osm_sf$osm_points %>% select(osm_id,amenity) 
 bus_station
-
+bares <- ors_sf$osm_points %>% select(osm_id, amenity)
+bares
+##Al seleccionar la columna id, nos dan los puntos sobre los cuales se encuentran los bares en bogota
 ## Pintar las estaciones de autobus
 leaflet() %>% addTiles() %>% addCircleMarkers(data=bus_station , col="red")
 
+leaflet() %>% addTiles() %>% addCircleMarkers(data= bares, col="blue")
 ## **[5.] Operaciones geometricas**
 
 ### **5.1 Importar conjuntos de datos**
@@ -62,6 +66,9 @@ leaflet() %>% addTiles() %>% addCircleMarkers(data=bus_station , col="red")
 ## my_house
 my_house <- geocode_OSM("Calle 26 %23% 4-29, Bogotá", as.sf=T) 
 my_house
+casa_vicky <- geocode_OSM("Cra 39B %23% 4-45, Bogotá", as.sf=T)
+casa_vicky
+leaflet() %>% addTiles() %>% addCircles(data= casa_vicky)
 
 ## parques
 parques <- opq(bbox = getbb("Bogota Colombia")) %>%
